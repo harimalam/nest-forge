@@ -2,22 +2,33 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
 import request from 'supertest';
 import { AppModule } from './../src/app.module';
+import { MailService } from '@core/mail';
 
 describe('AppController (e2e)', () => {
   let app: NestFastifyApplication;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(MailService)
+      .useValue({
+        sendMail: jest.fn(),
+      })
+      .compile();
 
     const adapter = new FastifyAdapter();
-
-    app = moduleFixture.createNestApplication<NestFastifyApplication>(adapter);
-
+    app = moduleFixture.createNestApplication(adapter);
     await app.init();
-
     await adapter.getInstance().ready();
+  });
+
+  afterAll(async () => {
+    const instance = app.getHttpAdapter().getInstance();
+    await app.close();
+    await instance.close();
+
+    await new Promise((resolve) => setImmediate(resolve));
   });
 
   it('/ (GET) - Redirects to health', () => {
@@ -31,9 +42,5 @@ describe('AppController (e2e)', () => {
       .expect((res) => {
         expect((res.body as { status: string }).status).toBe('ok');
       });
-  });
-
-  afterAll(async () => {
-    await app.close();
   });
 });

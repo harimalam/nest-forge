@@ -1,0 +1,14 @@
+model Session {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String    @map("user_id") @db.Uuid
+  userAgent  String?   @map("user_agent")
+  ipAddress  String?   @map("ip_address")
+  lastActive DateTime? @default(now()) @map("last_active") @db.Timestamptz
+  isRevoked  Boolean   @default(false) @map("is_revoked")
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId], name: "sessions_user_id_idx")
+  @@map("sessions")
+}

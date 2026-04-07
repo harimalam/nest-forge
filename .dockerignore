@@ -1,0 +1,12 @@
+node_modules
+dist
+generated
+
+.git
+.gitignore
+.dockerignore
+.editorconfig
+.vscode
+
+.env
+*.md

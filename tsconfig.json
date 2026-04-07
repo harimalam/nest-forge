@@ -1,25 +1,46 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
-    "resolvePackageJsonExports": true,
-    "esModuleInterop": true,
-    "isolatedModules": true,
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "target": "ES2023",
-    "sourceMap": true,
+    "lib": ["ES2023"],
     "outDir": "./dist",
     "baseUrl": "./",
-    "incremental": true,
-    "skipLibCheck": true,
+    "paths": {
+      "@common/*": ["src/common/*"],
+      "@core/*": ["src/modules/core/*"],
+      "@api/*": ["src/modules/api/*"],
+      "@generated/*": ["generated/*"]
+    },
+    /* Strictness - Industry Standard */
+    "strict": true,
+    "noImplicitAny": true,
     "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    /* NestJS Essentials */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    /* Node 24 & Modern Perf */
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "noFallthroughCasesInSwitch": false
-  }
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "declaration": true,
+    "incremental": true,
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true
+  },
+  "include": ["src/**/*", "test/**/*", "prisma.config.ts"],
+  "exclude": ["node_modules", "dist"]
 }

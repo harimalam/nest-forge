@@ -1,0 +1,10 @@
+model Role {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String  @unique
+  description String?
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}

@@ -1,0 +1,12 @@
+model Permission {
+  id          String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  module      String
+  action      String
+  slug        String  @unique
+  description String?
+
+  rolePermissions RolePermission[]
+
+  @@unique([module, action])
+  @@map("permissions")
+}

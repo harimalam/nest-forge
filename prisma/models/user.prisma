@@ -1,0 +1,18 @@
+model User {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  email     String    @unique
+  password  String
+  roleId    String    @map("role_id") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz
+
+  role     Role      @relation(fields: [roleId], references: [id])
+  sessions Session[]
+
+  @@index([id(sort: Desc)], name: "users_cursor_pagination_idx")
+  @@index([deletedAt],      name: "users_active_idx")
+  @@index([email],          name: "users_email_idx")
+  @@map("users")
+}

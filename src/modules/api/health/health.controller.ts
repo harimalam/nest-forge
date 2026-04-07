@@ -3,6 +3,8 @@ import { HealthCheckService, HealthCheck, HealthCheckResult, MemoryHealthIndicat
 import * as os from 'os';
 import { ApiOkResponse, ApiOperation, ApiServiceUnavailableResponse, ApiTags } from '@nestjs/swagger';
 import { HealthResponseDto } from './dto/health-response.dto';
+import { PrismaService } from '@core/database';
+import { CacheService } from '@core/cache';
 
 @ApiTags('System')
 @Controller('health')
@@ -10,6 +12,8 @@ export class HealthController {
   constructor(
     private health: HealthCheckService,
     private memory: MemoryHealthIndicator,
+    private prisma: PrismaService,
+    private cache: CacheService,
   ) {}
 
   @ApiOperation({ summary: 'Check application health' })
@@ -41,6 +45,28 @@ export class HealthController {
   @HttpCode(HttpStatus.OK)
   async check(): Promise<HealthCheckResult> {
     return this.health.check([
+      // Database Check (Prisma)
+      async () => {
+        try {
+          await this.prisma.$queryRaw`SELECT 1`;
+          return { database: { status: 'up', type: 'postgres' } };
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : 'Unknown database error';
+          return { database: { status: 'down', message } };
+        }
+      },
+
+      // 2. Cache Check (Redis)
+      async () => {
+        try {
+          const status = await this.cache.ping();
+          return { cache: { status: 'up', response: status, type: 'cache' } };
+        } catch (error: unknown) {
+          const message = error instanceof Error ? error.message : 'Unknown cache error';
+          return { cache: { status: 'down', message } };
+        }
+      },
+
       // Memory: Hard Fail at 90% (Critical for OOM prevention)
       async () => {
         const total = os.totalmem();

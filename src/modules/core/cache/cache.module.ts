@@ -2,6 +2,7 @@ import { Logger, Module } from '@nestjs/common';
 import { Redis } from 'ioredis';
 import { CACHE_CLIENT } from './cache.constants';
 import { ConfigService } from '@core/config/config.service';
+import { CacheService } from './cache.service';
 
 @Module({
   providers: [
@@ -33,7 +34,8 @@ import { ConfigService } from '@core/config/config.service';
       },
       inject: [ConfigService],
     },
+    CacheService,
   ],
-  exports: [CACHE_CLIENT],
+  exports: [CACHE_CLIENT, CacheService],
 })
-export class RedisModule {}
+export class CacheModule {}

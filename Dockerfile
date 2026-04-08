@@ -41,6 +41,6 @@ COPY --from=builder /app/LICENSE ./LICENSE
 EXPOSE 3000
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=5s \
-  CMD curl -f http://localhost:3000/api/health || exit 1
+  CMD curl -f http://localhost:3000/health || exit 1
 
 CMD ["pnpm", "run", "start:docker"]

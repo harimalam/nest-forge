@@ -1,9 +1,7 @@
-# --- Base image with corepack and pnpm ---
 FROM node:24-alpine AS base
 RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
-# --- Install dependencies (including devDependencies for build) ---
 FROM base AS deps
 COPY package.json pnpm-lock.yaml .npmrc ./
 COPY prisma ./prisma
@@ -12,28 +10,26 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     SKIP_PRISMA_GENERATE=true \
     pnpm install --frozen-lockfile
 
-# --- Build the application ---
 FROM base AS builder
 COPY . .
 COPY --from=deps /app/node_modules ./node_modules
 RUN pnpm run build:swc
 RUN pnpm prisma generate
 
-# Remove devDependencies to keep image lean
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm prune --prod --ignore-scripts
 
-# --- Runner stage ---
 FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 
-# Create a non-root user
+USER root
+RUN apk add --no-cache curl
+
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nestjs
 USER nestjs
 
-# Copy production artifacts
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist

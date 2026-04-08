@@ -27,8 +27,10 @@ pipeline {
                 stage('Build & Push (ARM64)') {
                     steps {
                         script {
-                            sh "docker buildx use multiarch-builder"
-                            
+                            sh "docker buildx create --name jenkins-builder --use || docker buildx use jenkins-builder"
+
+                            sh "docker buildx inspect --bootstrap"
+
                             sh "echo ${GHCR_CREDS_PSW} | docker login ${REGISTRY} -u ${GHCR_CREDS_USR} --password-stdin"
 
                             sh """

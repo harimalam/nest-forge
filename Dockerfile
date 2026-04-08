@@ -44,8 +44,7 @@ COPY --from=builder /app/LICENSE ./LICENSE
 
 EXPOSE 3000
 
-# Use Node fetch for healthcheck
 HEALTHCHECK --interval=10s --timeout=5s --start-period=15s --retries=5 \
-  CMD node -e "fetch('http://localhost:3000/api/health').then(r => r.ok ? process.exit(0) : process.exit(1)).catch(() => process.exit(1))"
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 CMD ["pnpm", "run", "start:docker"]

@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'x86_64' }
+    agent { label 'built_in' }
 
     environment {
         REGISTRY = "ghcr.io"

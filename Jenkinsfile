@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'built_in' }
+    agent { label 'x86_64' }
 
     environment {
         REGISTRY = "ghcr.io"
@@ -69,8 +69,8 @@ pipeline {
                                     cd ${DEPLOY_PATH}
                                     docker compose up -d
                                     
-                                    # 3. Targeted Cleanup (Delete only old versions of this app)
-                                    docker images ${REGISTRY}/${IMAGE_BASE} -f "dangling=true" -q | xargs -r docker rmi
+                                    # 3. Targeted Cleanup (Fixed the xargs error)
+                                    docker images ${REGISTRY}/${IMAGE_BASE} -f "dangling=true" -q | xargs -r docker rmi || true
                                 EOF
                             """
                         }

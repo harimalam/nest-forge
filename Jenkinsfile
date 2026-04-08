@@ -24,37 +24,30 @@ pipeline {
                     }
                 }
 
-              stage('Build & Push') {
+                stage('Build & Push (Multi-Arch)') {
                     steps {
                         script {
-                            def agentArch = sh(script: "uname -m", returnStdout: true).trim()
-                            echo "Detected Agent Architecture: ${agentArch}"
-
+                            // 1. Log in to GHCR
                             sh "echo ${GHCR_CREDS_PSW} | docker login ${REGISTRY} -u ${GHCR_CREDS_USR} --password-stdin"
 
-                            if (agentArch == 'aarch64') {
-                                echo "Running on ARM agent. Performing native build..."
-                                sh """
-                                    docker build \
-                                    -t ${REGISTRY}/${IMAGE_BASE}:${env.BUILD_ID} \
-                                    -t ${REGISTRY}/${IMAGE_BASE}:latest \
-                                    --push .
-                                """
-                            } else {
-                                echo "Running on x86 agent. Performing Multi-arch Buildx build..."
-                                sh "docker buildx create --name jenkins-builder --use || docker buildx use jenkins-builder"
-                                sh "docker buildx inspect --bootstrap"
-                                sh """
-                                    docker buildx build \
-                                    --platform linux/arm64 \
-                                    -t ${REGISTRY}/${IMAGE_BASE}:${env.BUILD_ID} \
-                                    -t ${REGISTRY}/${IMAGE_BASE}:latest \
-                                    --push .
-                                """
-                            }
+                            // 2. Setup the builder (Required for multi-platform)
+                            sh "docker buildx create --name jenkins-builder --use || docker buildx use jenkins-builder"
+                            sh "docker buildx inspect --bootstrap"
+
+                            // 3. The Unified Build Command
+                            // This creates one tag that works on BOTH architectures
+                            echo "Starting Multi-Platform build for linux/amd64 and linux/arm64..."
+                            sh """
+                                docker buildx build \
+                                --platform linux/amd64,linux/arm64 \
+                                -t ${REGISTRY}/${IMAGE_BASE}:${env.BUILD_ID} \
+                                -t ${REGISTRY}/${IMAGE_BASE}:latest \
+                                --push .
+                            """
                         }
                     }
                 }
+
                 stage('Remote Deploy via SSH') {
                     steps {
                         sshagent([env.SSH_KEY_ID]) {

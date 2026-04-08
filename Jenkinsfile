@@ -29,7 +29,6 @@ pipeline {
                                     # Ensure we are on main and up-to-date
                                     git fetch origin
                                     git reset --hard origin/main
-                                    git clean -fd
 
                                     # Restart containers
                                     docker compose down

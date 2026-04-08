@@ -11,7 +11,6 @@ async function bootstrap() {
     logger: winstonLogger,
   });
   const logger = new Logger('Bootstrap');
-
   app.enableShutdownHooks();
 
   const configService = app.get(ConfigService);

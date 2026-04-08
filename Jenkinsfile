@@ -51,12 +51,6 @@ pipeline {
     }
 
     post {
-        always {
-            script {
-                sh "docker buildx prune -f --filter until=24h"
-                cleanWs()
-            }
-        }
         success {
             echo "Build ${env.BUILD_ID} is LIVE on the ARM Server!"
         }
